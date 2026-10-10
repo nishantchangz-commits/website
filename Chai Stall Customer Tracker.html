@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Chai Stall Customer Tracker</title>
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;700&family=Nunito:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#EEF2EC;--card:#fff;--ink:#1F2A24;--mute:#5E6B63;--green:#2F5D46;--gold:#E8A317;--line:#D3DCD2;--soft:#E1EADF;
+box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#151C18;--card:#1E2822;--ink:#EAF0EA;--mute:#9AAB9F;--green:#6FBF93;--gold:#F0B33A;--line:#2D3A32;--soft:#26332B}}
+:root[data-theme="dark"]{--bg:#151C18;--card:#1E2822;--ink:#EAF0EA;--mute:#9AAB9F;--green:#6FBF93;--gold:#F0B33A;--line:#2D3A32;--soft:#26332B}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.5 Nunito,system-ui,sans-serif}
+main{max-width:640px;margin:0 auto;padding:16px 16px 90px}
+h1,h2{font-family:'Baloo 2',Nunito,sans-serif;margin:0;line-height:1.15}
+h1{font-size:28px}h2{font-size:20px;margin-bottom:8px}
+.sub{color:var(--mute);margin:2px 0 16px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:16px;margin-bottom:14px}
+nav{position:fixed;left:0;right:0;bottom:0;background:var(--card);border-top:1px solid var(--line);display:flex;padding-bottom:env(safe-area-inset-bottom,0px)}
+nav button{flex:1;background:none;border:0;color:var(--mute);font:600 13px Nunito,sans-serif;padding:12px 4px;cursor:pointer}
+nav button[aria-selected=true]{color:var(--green);box-shadow:inset 0 3px 0 var(--gold)}
+button:focus-visible,input:focus-visible,select:focus-visible{outline:3px solid var(--gold);outline-offset:2px}
+.row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+input,select{font:inherit;color:var(--ink);background:var(--bg);border:1px solid var(--line);border-radius:10px;padding:10px 12px;min-width:0}
+input{flex:1}
+.btn{background:var(--green);color:#fff;border:0;border-radius:10px;padding:10px 16px;font:700 15px Nunito,sans-serif;cursor:pointer}
+:root[data-theme="dark"] .btn{color:#0f1a14}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .btn{color:#0f1a14}}
+.btn.alt{background:var(--soft);color:var(--ink)}
+.btn.gold{background:var(--gold);color:#2a1d00}
+.big{font:700 44px 'Baloo 2',sans-serif;line-height:1}
+.bar{height:12px;background:var(--soft);border-radius:8px;overflow:hidden;margin:8px 0}
+.bar i{display:block;height:100%;background:var(--green);border-radius:8px;transition:width .3s}
+.stepper{display:flex;align-items:center;gap:10px}
+.stepper button{width:44px;height:44px;border-radius:50%;border:1px solid var(--line);background:var(--card);color:var(--ink);font-size:22px;cursor:pointer}
+.stepper b{min-width:44px;text-align:center;font:700 26px 'Baloo 2',sans-serif}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.chart{display:flex;align-items:flex-end;gap:6px;height:110px;margin-top:8px}
+.chart div{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;height:100%;font-size:12px;color:var(--mute)}
+.chart span{display:block;width:100%;background:var(--green);border-radius:6px 6px 0 0;min-height:2px}
+.chart .today span{background:var(--gold)}
+.item{display:flex;justify-content:space-between;gap:10px;align-items:center;padding:10px 0;border-top:1px solid var(--line)}
+.item:first-of-type{border-top:0}
+.tag{font-size:13px;font-weight:700;padding:4px 10px;border-radius:20px;background:var(--soft);border:0;color:var(--ink);cursor:pointer}
+.tag.s2{background:#F6E3B0;color:#4a3500}.tag.s3{background:var(--green);color:#fff}
+:root[data-theme="dark"] .tag.s3{color:#0f1a14}
+.stamps{display:flex;gap:5px;margin-top:4px}
+.stamps u{width:20px;height:20px;border-radius:50%;border:2px solid var(--gold);text-decoration:none}
+.stamps u.on{background:var(--gold)}
+.muted{color:var(--mute);font-size:14px}
+.x{background:none;border:0;color:var(--mute);cursor:pointer;font-size:18px}
+label.chk{display:flex;gap:10px;align-items:flex-start;padding:7px 0;cursor:pointer}
+label.chk input{flex:none;width:20px;height:20px;margin-top:3px;accent-color:var(--green)}
+.empty{color:var(--mute);padding:8px 0}
+[hidden]{display:none!important}
+</style>
+</head>
+<body>
+<main>
+<h1>Chai Stall Tracker</h1>
+<p class="sub">Find customers, win them back, and watch them grow.</p>
+
+<section id="tab-today">
+  <div class="card">
+    <h2>Today</h2>
+    <div class="row" style="justify-content:space-between"><div><div class="big" id="total">0</div><div class="muted">cups sold · goal <span id="goalv"></span></div></div>
+    <div style="text-align:right"><div class="big" style="font-size:30px" id="profit">₹0</div><div class="muted">profit today</div></div></div>
+    <div class="bar"><i id="goalbar" style="width:0"></i></div>
+  </div>
+  <div class="grid2">
+    <div class="card"><h2>New</h2><div class="stepper"><button data-s="new" data-d="-1" aria-label="Fewer new customers">−</button><b id="v-new">0</b><button data-s="new" data-d="1" aria-label="More new customers">+</button></div></div>
+    <div class="card"><h2>Returning</h2><div class="stepper"><button data-s="ret" data-d="-1" aria-label="Fewer returning customers">−</button><b id="v-ret">0</b><button data-s="ret" data-d="1" aria-label="More returning customers">+</button></div></div>
+  </div>
+  <div class="card">
+    <h2>Money</h2>
+    <div class="row"><input id="price" type="number" inputmode="decimal" placeholder="Price per cup ₹"><input id="cost" type="number" inputmode="decimal" placeholder="Cost per cup ₹"></div>
+    <p class="muted" style="margin-bottom:0">Returning customers: <b id="retpct">0%</b> of today's cups.</p>
+  </div>
+  <div class="card">
+    <h2>Last 7 days</h2>
+    <div class="chart" id="chart"></div>
+    <div class="row" style="margin-top:12px"><span class="muted">Daily goal</span><input id="goal" type="number" inputmode="numeric" style="max-width:100px"></div>
+  </div>
+</section>
+
+<section id="tab-leads" hidden>
+  <div class="card">
+    <h2>Shops and offices nearby</h2>
+    <p class="muted" style="margin-top:0">Tap a status to move it forward: To visit → Sampled → Ordering daily.</p>
+    <div class="row"><input id="l-name" placeholder="Name (e.g. Sharma Mobile Shop)"><select id="l-type"><option>Shop</option><option>Office</option><option>College</option><option>Workshop</option><option>Other</option></select></div>
+    <div class="row" style="margin-top:8px"><input id="l-cups" type="number" inputmode="numeric" placeholder="Cups per day"><button class="btn" id="l-add">Add lead</button></div>
+  </div>
+  <div class="card"><div id="leads"></div><p class="muted" id="leadsum" style="margin:10px 0 0"></p></div>
+</section>
+
+<section id="tab-reg" hidden>
+  <div class="card">
+    <h2>Regulars</h2>
+    <p class="muted" style="margin-top:0">Buy 5 teas, get the 6th free. Add a stamp every time they buy.</p>
+    <div class="row"><input id="r-name" placeholder="Customer name or nickname"><button class="btn" id="r-add">Add</button></div>
+  </div>
+  <div class="card"><div id="regs"></div></div>
+</section>
+
+<section id="tab-plan" hidden>
+  <div class="card"><h2>60-day plan</h2><div class="bar"><i id="planbar" style="width:0"></i></div><p class="muted" id="plantxt" style="margin:0"></p></div>
+  <div id="plan"></div>
+</section>
+</main>
+
+<nav role="tablist">
+  <button role="tab" data-t="today" aria-selected="true">Today</button>
+  <button role="tab" data-t="leads" aria-selected="false">Leads</button>
+  <button role="tab" data-t="reg" aria-selected="false">Regulars</button>
+  <button role="tab" data-t="plan" aria-selected="false">Plan</button>
+</nav>
+
+<script>
+const PLAN=[
+["Study your location (days 1-7)",["Count who passes and note busy hours","List nearby competitors and their prices","Find anchor places within 200 m"]],
+["Make the stall worth stopping at (days 5-14)",["Pick one signature tea","Put up a menu board with 4-6 priced items","Clean cups, covered snacks, neat counter","Get tea ready in under 2 minutes at rush hour"]],
+["Win first customers (days 10-30)",["Run a free sample day","Visit nearby shops and offices, offer flask delivery","Start the 5+1 stamp card","Offer group and student deals"]],
+["Go online (days 15-40)",["Add stall to Google Maps with photos and timings","Set up WhatsApp Business with a catalog","Post tea-making reels","Ask regulars for Google reviews"]],
+["Keep them coming back (days 30-60)",["Learn regulars' names and usual orders","Offer a monthly pass","Add a seasonal special","Ask 5 regulars what to improve","Offer tea for local events"]]];
+const STAGES=["To visit","Sampled","Ordering daily"];
+const key=()=>new Date().toISOString().slice(0,10);
+let S={days:{},leads:[],regs:[],plan:{},goal:80,price:10,cost:4};
+try{const r=localStorage.getItem('chai-app');if(r)S=Object.assign(S,JSON.parse(r))}catch(e){}
+const save=()=>{try{localStorage.setItem('chai-app',JSON.stringify(S))}catch(e){}};
+const $=id=>document.getElementById(id);
+const esc=s=>s.replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const day=()=>S.days[key()]||(S.days[key()]={new:0,ret:0});
+
+function renderToday(){
+  const d=day(),t=d.new+d.ret;
+  $('v-new').textContent=d.new;$('v-ret').textContent=d.ret;$('total').textContent=t;
+  $('goalv').textContent=S.goal;$('goalbar').style.width=Math.min(100,t/S.goal*100)+'%';
+  $('profit').textContent='₹'+Math.round(t*(S.price-S.cost));
+  $('retpct').textContent=t?Math.round(d.ret/t*100)+'%':'0%';
+  $('price').value=S.price;$('cost').value=S.cost;$('goal').value=S.goal;
+  const out=[];let max=1;
+  for(let i=6;i>=0;i--){const dt=new Date();dt.setDate(dt.getDate()-i);const k=dt.toISOString().slice(0,10);const v=S.days[k]?S.days[k].new+S.days[k].ret:0;max=Math.max(max,v);out.push({v,l:'SMTWTFS'[dt.getDay()],today:i===0})}
+  $('chart').innerHTML=out.map(o=>`<div class="${o.today?'today':''}"><small>${o.v||''}</small><span style="height:${o.v/max*80}%"></span>${o.l}</div>`).join('');
+}
+document.addEventListener('click',e=>{
+  const b=e.target.closest('[data-s]');if(!b)return;
+  const d=day(),k=b.dataset.s;d[k]=Math.max(0,d[k]+Number(b.dataset.d));save();renderToday();
+});
+[['price','price'],['cost','cost'],['goal','goal']].forEach(([id,k])=>$(id).addEventListener('change',()=>{S[k]=Math.max(0,Number($(id).value)||0);if(k==='goal'&&!S.goal)S.goal=80;save();renderToday()}));
+
+function renderLeads(){
+  $('leads').innerHTML=S.leads.length?S.leads.map((l,i)=>`<div class="item"><div><b>${esc(l.name)}</b><div class="muted">${l.type}${l.cups?' · '+l.cups+' cups/day':''}</div></div><div class="row"><button class="tag s${l.st+1}" data-lead="${i}">${STAGES[l.st]}</button><button class="x" data-ldel="${i}" aria-label="Remove ${esc(l.name)}">×</button></div></div>`).join(''):'<div class="empty">No leads yet. Add the first shop or office near your stall.</div>';
+  const ord=S.leads.filter(l=>l.st===2);const c=ord.reduce((a,l)=>a+(l.cups||0),0);
+  $('leadsum').textContent=S.leads.length?`${ord.length} of ${S.leads.length} ordering daily · about ${c} cups/day secured`:'';
+}
+$('l-add').onclick=()=>{const n=$('l-name').value.trim();if(!n)return $('l-name').focus();S.leads.push({name:n,type:$('l-type').value,cups:Number($('l-cups').value)||0,st:0});$('l-name').value='';$('l-cups').value='';save();renderLeads()};
+$('leads').addEventListener('click',e=>{
+  const a=e.target.closest('[data-lead]'),r=e.target.closest('[data-ldel]');
+  if(a){const l=S.leads[a.dataset.lead];l.st=(l.st+1)%3;}
+  if(r)S.leads.splice(r.dataset.ldel,1);
+  if(a||r){save();renderLeads()}
+});
+
+function renderRegs(){
+  $('regs').innerHTML=S.regs.length?S.regs.map((r,i)=>{
+    const full=r.s>=5;
+    return `<div class="item"><div><b>${esc(r.name)}</b><div class="stamps">${[0,1,2,3,4].map(n=>`<u class="${n<r.s?'on':''}"></u>`).join('')}</div><div class="muted">${r.free?r.free+' free tea(s) given · ':''}${full?'Next tea is free':(5-r.s)+' more for a free tea'}</div></div><div class="row">${full?`<button class="btn gold" data-redeem="${i}">Free tea</button>`:`<button class="btn" data-stamp="${i}">+ Stamp</button>`}<button class="x" data-rdel="${i}" aria-label="Remove ${esc(r.name)}">×</button></div></div>`}).join(''):'<div class="empty">No regulars yet. Add the first person who comes back.</div>';
+}
+$('r-add').onclick=()=>{const n=$('r-name').value.trim();if(!n)return $('r-name').focus();S.regs.push({name:n,s:0,free:0});$('r-name').value='';save();renderRegs()};
+$('regs').addEventListener('click',e=>{
+  const s=e.target.closest('[data-stamp]'),f=e.target.closest('[data-redeem]'),d=e.target.closest('[data-rdel]');
+  if(s)S.regs[s.dataset.stamp].s++;
+  if(f){const r=S.regs[f.dataset.redeem];r.s=0;r.free++}
+  if(d)S.regs.splice(d.dataset.rdel,1);
+  if(s||f||d){save();renderRegs()}
+});
+
+function renderPlan(){
+  let n=0,done=0;
+  $('plan').innerHTML=PLAN.map((p,i)=>`<div class="card"><h2>${p[0]}</h2>${p[1].map((t,j)=>{const id=i+'-'+j;n++;const c=S.plan[id];if(c)done++;return `<label class="chk"><input type="checkbox" data-p="${id}" ${c?'checked':''}><span>${t}</span></label>`}).join('')}</div>`).join('');
+  $('planbar').style.width=done/n*100+'%';$('plantxt').textContent=`${done} of ${n} tasks done`;
+}
+$('plan').addEventListener('change',e=>{const id=e.target.dataset.p;if(id===undefined)return;S.plan[id]=e.target.checked;save();renderPlan()});
+
+document.querySelector('nav').addEventListener('click',e=>{
+  const b=e.target.closest('[data-t]');if(!b)return;
+  document.querySelectorAll('nav button').forEach(x=>x.setAttribute('aria-selected',x===b));
+  ['today','leads','reg','plan'].forEach(t=>$('tab-'+t).hidden=t!==b.dataset.t);
+  window.scrollTo(0,0);
+});
+renderToday();renderLeads();renderRegs();renderPlan();
+</script>
+</body>
+</html>
